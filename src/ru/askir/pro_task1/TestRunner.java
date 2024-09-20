@@ -73,6 +73,8 @@ public class TestRunner {
             for (Method method : tests.values()) {
                 invokeStaticMethod(beforeTestMethod);
 
+                method.setAccessible(true);
+
                 CsvSource csvSourceAnnotation = method.getAnnotation(CsvSource.class);
                 if(csvSourceAnnotation != null) {
                     String csv = csvSourceAnnotation.value();
