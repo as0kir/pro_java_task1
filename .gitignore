@@ -4,3 +4,4 @@
 /.idea/pro_java_task1.iml
 /.idea/vcs.xml
 /.idea/.gitignore
+/out/**/*.class
