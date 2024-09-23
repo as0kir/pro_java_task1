@@ -14,9 +14,8 @@ public class TestStream {
     // Реализуйте удаление из листа всех дубликатов
     private static <E> List<E> deleteCopy(List<E> list){
         return list.stream()
-                .collect(Collectors.toSet())
-                .stream()
-                .toList();
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     // Найдите в списке целых чисел 3-е наибольшее число (пример: 5 2 10 9 4 3 10 1 13 => 10)
@@ -24,19 +23,18 @@ public class TestStream {
         return list.stream()
                 .sorted(Comparator.reverseOrder())
                 .skip(2)
-                .findAny()
-                .get();
+                .findFirst()
+                .orElse(0);
     }
 
     // Найдите в списке целых чисел 3-е наибольшее «уникальное» число (пример: 5 2 10 9 4 3 10 1 13 => 9, в отличие от прошлой задачи здесь разные 10 считает за одно число)
     private static Integer findUniqMax(List<Integer> list) {
         return list.stream()
-                .collect(Collectors.toSet())
-                .stream()
+                .distinct()
                 .sorted(Comparator.reverseOrder())
                 .skip(2)
-                .findAny()
-                .get();
+                .findFirst()
+                .orElse(0);
     }
 
     // Имеется список объектов типа Сотрудник (имя, возраст, должность), необходимо получить список имен 3 самых старших сотрудников с должностью «Инженер», в порядке убывания возраста
@@ -61,8 +59,8 @@ public class TestStream {
     private static String findLongestWord(String str) {
         return Arrays.stream(str.split(" "))
                 .sorted(Comparator.comparingInt(String::length).reversed())
-                .findAny()
-                .get();
+                .findFirst()
+                .orElse("");
     }
 
     // Имеется строка с набором слов в нижнем регистре, разделенных пробелом. Постройте хеш-мапы, в которой будут хранится пары: слово - сколько раз оно встречается во входной строке
@@ -83,7 +81,8 @@ public class TestStream {
         return list.stream()
                 .flatMap(s -> Arrays.stream(s.split(" ")))
                 .sorted(Comparator.comparingInt(String::length).reversed())
-                .findAny().get();
+                .findFirst()
+                .orElse("");
     }
 
     public static void main(String[] args) {
