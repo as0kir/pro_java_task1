@@ -61,6 +61,18 @@ public class ThreadPool {
         return -1;
     }
 
+    private boolean shutdownDone(){
+        if(isShutdown && taskList.size() == 0) {
+            boolean allDone = true;
+            for (int i = 0; i < threadCount; i++) {
+                if(threadArray[i] != null && threadArray[i].isAlive())
+                    allDone = false;
+            }
+            return allDone;
+        }
+        return false;
+    }
+
     public void execute(Runnable runnable){
         listLock.lock();
 
@@ -86,7 +98,7 @@ public class ThreadPool {
     }
 
     public void awaitTermination() {
-        while (!(isShutdown && taskList.size() == 0)) {
+        while (!shutdownDone()) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
