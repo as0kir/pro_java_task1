@@ -3,7 +3,6 @@ package ru.askir.pro_task3;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
-import static java.lang.Thread.sleep;
 
 public class ThreadPool {
     private ReentrantLock listLock = new ReentrantLock();
@@ -11,6 +10,7 @@ public class ThreadPool {
     private int threadCount;
     private Thread[] threadArray;
     private LinkedList<Runnable> taskList;
+    private Object monitor = new Object();
 
     public ThreadPool(int threadCount) {
         this.threadCount = threadCount;
@@ -19,11 +19,14 @@ public class ThreadPool {
         this.isShutdown = new AtomicBoolean(false);
 
         for (int i = 0; i < threadCount; i++) {
+            final int w = i;
+
             this.threadArray[i] = new Thread(() -> {
                 try {
                     while (!Thread.currentThread().isInterrupted()) {
                         Runnable firstTask = null;
 
+                        // ищем задание
                         listLock.lock();
                         try {
                             if (isShutdown.get() && taskList.size() == 0) {
@@ -37,10 +40,17 @@ public class ThreadPool {
                             listLock.unlock();
                         }
 
+                        // выполняем
                         if(firstTask != null)
                             firstTask.run();
 
-                        sleep(100);
+                        // ожидание
+                        synchronized (monitor) {
+                            if (!isShutdown.get() && taskList.size() == 0) {
+                                System.out.println(String.format("Поток %s в ожидании ", w));
+                                monitor.wait();
+                            }
+                        }
                     }
                 } catch(InterruptedException exception) {
                     return;
@@ -69,7 +79,10 @@ public class ThreadPool {
             if(isShutdown.get())
                 throw new IllegalStateException("Пул в состоянии завершения");
 
-            taskList.add(runnable);
+            synchronized (monitor) {
+                taskList.add(runnable);
+                monitor.notify();
+            }
         }
         finally {
             listLock.unlock();
@@ -78,6 +91,9 @@ public class ThreadPool {
 
     public void shutdown(){
         isShutdown.set(true);
+        synchronized (monitor) {
+            monitor.notifyAll();
+        }
     }
 
     public void awaitTermination() {
