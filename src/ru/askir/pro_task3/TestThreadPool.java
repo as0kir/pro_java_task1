@@ -27,7 +27,7 @@ public class TestThreadPool {
         System.out.println("Завершение работы");
         threadPool.shutdown();
 
-        final int w = 100;
+        final int w = 500;
 
         try {
             threadPool.execute(() -> {
